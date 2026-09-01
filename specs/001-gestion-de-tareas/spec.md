@@ -8,6 +8,16 @@
 
 **Input**: User description: "Construir una aplicación web de gestión de tareas con creación, edición, eliminación, filtros, cambio rápido de estado, contador y persistencia entre sesiones."
 
+## Clarifications
+
+### Session 2026-09-01
+
+- Q: ¿Cómo debe realizarse la edición de una tarea: inline o mediante un modal simple? → A: Modal simple.
+- Q: ¿Qué debe ocurrir cuando el usuario intenta agregar una tarea sin título? → A: Impedir el guardado y mostrar un mensaje de error junto al título.
+- Q: ¿Los filtros de prioridad y estado deben combinarse mediante una condición AND, mostrando solo tareas que cumplan ambos filtros? → A: Combinar mediante AND.
+- Q: ¿El contador de tareas pendientes y completadas debe actualizarse inmediatamente después de cada cambio? → A: Actualizar inmediatamente después de cada operación.
+- Q: ¿Cómo deben ordenarse dos o más tareas que tengan exactamente la misma fecha de creación? → A: Usar un identificador de creación descendente como desempate.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Administrar tareas (Priority: P1)
@@ -24,6 +34,7 @@ Como usuario, quiero crear, consultar, editar y eliminar mis tareas para mantene
 2. **Given** una tarea existente, **When** el usuario edita su título, descripción, prioridad o estado y guarda, **Then** la lista muestra los valores actualizados sin perder los demás datos.
 3. **Given** una tarea existente, **When** el usuario solicita eliminarla, **Then** se muestra un diálogo nativo de confirmación y la tarea solo desaparece si confirma.
 4. **Given** una tarea existente, **When** el usuario cancela la confirmación de eliminación, **Then** la tarea permanece sin cambios.
+5. **Given** el formulario de alta sin un título o con un título compuesto solo por espacios, **When** el usuario intenta guardarlo, **Then** el guardado se bloquea y se muestra un mensaje de error junto al campo de título.
 
 ---
 
@@ -40,7 +51,7 @@ Como usuario, quiero encontrar tareas por prioridad o estado y marcar una tarea 
 1. **Given** varias tareas con prioridades distintas, **When** el usuario selecciona Mostrar todas, Alta, Media o Baja, **Then** se muestran inmediatamente todas las tareas o solo las de la prioridad elegida.
 2. **Given** varias tareas con estados distintos, **When** el usuario selecciona Mostrar todas, Pendientes, En Progreso o Completadas, **Then** se muestran inmediatamente todas las tareas o solo las del estado elegido.
 3. **Given** una tarea no completada, **When** el usuario activa su control de completado, **Then** el estado cambia a Completada y el contador se actualiza sin recargar la página.
-4. **Given** filtros de prioridad y estado activos, **When** el usuario cambia uno de ellos, **Then** la lista refleja inmediatamente la combinación actual de ambos filtros.
+4. **Given** filtros de prioridad y estado activos, **When** el usuario consulta la lista, **Then** solo se muestran las tareas que cumplen simultáneamente ambos filtros.
 
 ---
 
@@ -54,7 +65,7 @@ Como usuario, quiero ver cuántas tareas están pendientes y completadas y conse
 
 **Acceptance Scenarios**:
 
-1. **Given** una lista con tareas pendientes y completadas, **When** el usuario la consulta, **Then** el contador muestra por separado las cantidades de tareas pendientes y completadas.
+1. **Given** una lista con tareas pendientes y completadas, **When** el usuario la consulta o cambia una tarea, **Then** el contador muestra inmediatamente y por separado las cantidades actuales de tareas pendientes y completadas.
 2. **Given** una tarea guardada, **When** el usuario recarga la aplicación o vuelve a abrirla en el mismo navegador, **Then** la tarea conserva título, descripción, prioridad, estado y fecha de creación.
 3. **Given** que no existen tareas guardadas, **When** el usuario abre la aplicación, **Then** se muestra un estado vacío claro y el contador indica cero tareas pendientes y cero completadas.
 
@@ -74,18 +85,18 @@ Como usuario, quiero ver cuántas tareas están pendientes y completadas y conse
 
 ### Functional Requirements
 
-- **FR-001**: La aplicación MUST mostrar las tareas ordenadas por fecha de creación, de la más reciente a la más antigua.
+- **FR-001**: La aplicación MUST mostrar las tareas ordenadas por fecha de creación, de la más reciente a la más antigua; cuando dos fechas sean iguales, MUST usar el identificador de creación en orden descendente como desempate.
 - **FR-002**: La aplicación MUST permitir crear una tarea con título obligatorio, descripción opcional, prioridad Alta/Media/Baja y estado Pendiente/En Progreso/Completada.
 - **FR-003**: La aplicación MUST asignar Media como prioridad predeterminada y Pendiente como estado predeterminado cuando el usuario no indique otros valores.
 - **FR-004**: La aplicación MUST rechazar títulos ausentes o compuestos únicamente por espacios e indicar cómo corregirlos.
-- **FR-005**: La aplicación MUST permitir editar el título, la descripción, la prioridad y el estado de una tarea existente mediante edición inline o un modal simple.
+- **FR-005**: La aplicación MUST permitir editar el título, la descripción, la prioridad y el estado de una tarea existente mediante un modal simple accesible, con acciones claras para guardar o cancelar.
 - **FR-006**: La aplicación MUST solicitar confirmación mediante un diálogo nativo antes de eliminar una tarea.
 - **FR-007**: La aplicación MUST eliminar una tarea solo después de que el usuario confirme la acción.
 - **FR-008**: La aplicación MUST ofrecer filtros de prioridad con las opciones Mostrar todas, Solo Alta, Solo Media y Solo Baja.
 - **FR-009**: La aplicación MUST ofrecer filtros de estado con las opciones Mostrar todas, Solo Pendientes, Solo En Progreso y Solo Completadas.
-- **FR-010**: La aplicación MUST aplicar los filtros instantáneamente, sin recargar la página, y combinar correctamente el filtro de prioridad con el de estado.
+- **FR-010**: La aplicación MUST aplicar los filtros instantáneamente, sin recargar la página, y mostrar únicamente las tareas que cumplan simultáneamente el filtro de prioridad y el filtro de estado seleccionados.
 - **FR-011**: La aplicación MUST permitir cambiar una tarea a Completada con un solo clic y actualizar inmediatamente su representación y el contador.
-- **FR-012**: La aplicación MUST mostrar un contador separado de tareas pendientes y tareas completadas, actualizado después de cada alta, edición, cambio de estado o eliminación.
+- **FR-012**: La aplicación MUST mostrar un contador separado de tareas pendientes y tareas completadas, actualizado inmediatamente después de cada alta, edición, cambio de estado o eliminación, sin recargar la página.
 - **FR-013**: La aplicación MUST conservar las tareas y sus atributos entre sesiones mediante almacenamiento local del navegador.
 - **FR-014**: La aplicación MUST recuperar de forma segura los datos guardados y mostrar un estado vacío utilizable si no hay datos válidos disponibles.
 - **FR-015**: La interfaz MUST ser responsiva con enfoque mobile-first y mantener todas las funciones en móvil y escritorio.
@@ -96,7 +107,7 @@ Como usuario, quiero ver cuántas tareas están pendientes y completadas y conse
 
 ### Key Entities *(include if feature involves data)*
 
-- **Tarea**: Unidad de trabajo del usuario; contiene identificador, título, descripción, prioridad, estado y fecha de creación.
+- **Tarea**: Unidad de trabajo del usuario; contiene un identificador de creación único y creciente, título, descripción, prioridad, estado y fecha de creación.
 - **Prioridad**: Clasificación de una tarea con uno de los valores Alta, Media o Baja.
 - **Estado**: Situación de una tarea con uno de los valores Pendiente, En Progreso o Completada.
 - **Filtro**: Criterio seleccionado para limitar la lista por prioridad, por estado o por ambos.
@@ -118,8 +129,8 @@ Como usuario, quiero ver cuántas tareas están pendientes y completadas y conse
 
 - La aplicación está destinada a un único usuario local; no incluye cuentas, autenticación, permisos ni sincronización entre dispositivos.
 - El almacenamiento local del navegador es suficiente para el volumen esperado de uso y no se requiere un servidor.
-- La fecha de creación se asigna automáticamente al registrar una tarea y no se edita desde la interfaz.
-- La edición puede resolverse con un formulario inline o con un modal simple; se elegirá la opción que mantenga menor complejidad y mejor accesibilidad.
+- La fecha de creación y el identificador único y creciente se asignan automáticamente al registrar una tarea y no se editan desde la interfaz.
+- La edición se realizará mediante un modal simple accesible, priorizando claridad en móvil y escritorio.
 - El diálogo nativo de confirmación es el mecanismo aceptado para evitar eliminaciones accidentales.
 - Las pruebas manuales documentadas se conservarán como evidencia del proyecto y se actualizarán cuando cambien los flujos CRUD.
 - El alcance no incluye búsqueda por texto, etiquetas, ordenamiento configurable, arrastrar y soltar, exportación, importación ni notificaciones.
