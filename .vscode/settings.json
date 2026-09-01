@@ -3,6 +3,14 @@
         "/^powershell\\.exe -NoProfile -ExecutionPolicy Bypass -File \\.\\\\\\.specify\\\\scripts\\\\powershell\\\\resolve-template\\.ps1 constitution-template -Json$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^powershell\\.exe -NoProfile -ExecutionPolicy Bypass -File \\.\\\\\\.specify\\\\scripts\\\\powershell\\\\check-prerequisites\\.ps1 -Json -PathsOnly$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^if \\(Test-Path '\\.\\\\\\.specify\\\\extensions\\.yml'\\) \\{ Get-Content '\\.\\\\\\.specify\\\\extensions\\.yml' -Raw \\} else \\{ 'No after-plan hooks: extensions\\.yml absent' \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }
